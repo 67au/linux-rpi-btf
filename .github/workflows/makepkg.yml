@@ -1,0 +1,133 @@
+name: Makepkg
+
+on:
+  workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
+
+jobs:
+  alarm_makepkg:
+    runs-on: ubuntu-latest
+    name: Makepkg Rebuild
+    outputs:
+      ver: ${{ steps.set_output.outputs.ver }}
+
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
+        with:
+          workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
+          name: build-${{ inputs.ver }}
+          path: '.'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: build.yml
+          name: build-${{ inputs.ver }}
+          path: '.'
+      - name: extract artifact
+        run: |
+          cat workdir.tar.gz.* > workdir.tar.gz
+          rm -r workdir.tar.gz.*
+          tar -xzf workdir.tar.gz
+      - uses: uraimo/run-on-arch-action@v2.7.1
+        name: Prepare Release
+        id: prepare
+        with:
+          arch: aarch64
+          distro: archarm_latest
+          githubToken: ${{ secrets.GH_PAT }}
+          dockerRunArgs: |
+            --volume "${PWD}/workdir:/workdir" --user alarm
+          shell: /bin/bash
+          install: |
+            sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
+            pacman -Syu --noconfirm --noprogressbar --needed base gawk perl
+            rm -rf /etc/pacman.d/gnupg
+            pacman-key --init
+            pacman-key --populate archlinuxarm
+            pacman-key --lsign-key "builder@archlinuxarm.org"
+            pacman -S --noconfirm --noprogressbar --needed base-devel python pahole ccache distcc bc kmod inetutils
+            useradd -m alarm
+            sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
+            sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
+            sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
+            sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
+            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(!distcc color ccache check sign)/" /etc/makepkg.conf
+            # sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/5:3632"/' /etc/makepkg.conf
+            echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+          run: |
+            sudo chown alarm:alarm -R /workdir
+            echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
+            sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
+            sudo pacman-key --finger ${{ secrets.GPGKEY }}
+            sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
+            cd /workdir/PKGBUILDs/core/linux-rpi
+            sudo rm -rf pkg
+            cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
+            
+            echo "rebuild scripts"
+            rm scripts/basic/fixdep
+            rm scripts/dtc/flattree.o
+            rm scripts/dtc/dtc.o
+            rm scripts/dtc/fstree.o
+            rm scripts/dtc/data.o
+            rm scripts/dtc/livetree.o
+            rm scripts/dtc/treesource.o
+            rm scripts/dtc/srcpos.o
+            rm scripts/dtc/checks.o
+            rm scripts/dtc/util.o
+            rm scripts/dtc/libfdt/fdt.o
+            rm scripts/dtc/libfdt/fdt_ro.o
+            rm scripts/dtc/libfdt/fdt_wip.o
+            rm scripts/dtc/libfdt/fdt_sw.o
+            rm scripts/dtc/libfdt/fdt_rw.o
+            rm scripts/dtc/libfdt/fdt_strerror.o
+            rm scripts/dtc/libfdt/fdt_empty_tree.o
+            rm scripts/dtc/libfdt/fdt_addresses.o
+            rm scripts/dtc/libfdt/fdt_overlay.o
+            rm scripts/dtc/fdtoverlay.o
+            rm scripts/dtc/dtc-lexer.lex.o
+            rm scripts/dtc/dtc-parser.tab.o
+            rm scripts/kallsyms
+            rm scripts/sorttable
+            rm scripts/asn1_compiler
+            rm scripts/mod/mk_elfconfig
+            rm scripts/mod/modpost.o
+            rm scripts/mod/file2alias.o
+            rm scripts/mod/sumversion.o
+            make tools/clean
+            make scripts dtbs_prepare modules_prepare -j4
+            
+            cd /workdir/PKGBUILDs/core/linux-rpi
+            makepkg -s --noconfirm --nodeps --sign -R
+            mkdir -p /workdir/repo/aarch64
+            cp ./*.pkg.tar.zst* /workdir/repo/aarch64
+            cd /workdir/repo/aarch64
+            repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: set output
+        id: set_output
+        run: |
+          sudo chown runner:docker -R ./workdir
+          mv ./workdir/repo ./repo
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'linux-rpi-btf-${{ inputs.ver }}'
+          path: './repo'

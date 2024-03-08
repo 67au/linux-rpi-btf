@@ -1,0 +1,52 @@
+name: Update Checker
+
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0,12 * * *'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    name: Check update
+
+    outputs:
+      output: ${{ steps.cacheHash.outputs.cache-hit }}
+    
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout alarm PKGBUILDs
+      with:
+        repository: archlinuxarm/PKGBUILDs
+        
+    - name: Get Commit Hash
+      id: getHash
+      run: |
+        echo "commitHash=$(git log -1 --format='%H' ./core/linux-rpi/)" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v4
+      name: Compare Commit Hash
+      id: cacheHash
+      with:
+        path: .commitHash
+        key: HEAD-${{ steps.getHash.outputs.commitHash }}
+
+    - name: Save New Commit Hash
+      if: steps.cacheHash.outputs.cache-hit != 'true'
+      run: |
+        echo ${{ steps.getHash.outputs.commitHash }} | tee .commitHash
+
+  trigger-build:
+    needs: check-update
+    name: Trigger build
+    if: needs.check-update.outputs.output != 'true'
+    uses: ./.github/workflows/release.yml
+    with:
+      workflow: update-checker.yml
+    secrets: inherit
+    

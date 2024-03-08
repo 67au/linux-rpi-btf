@@ -1,0 +1,66 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: write
+  pages: write
+  
+jobs:
+  publish:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
+        with:
+          workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
+          name: linux-rpi-btf-${{ inputs.ver }}
+          path: 'repo'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: makepkg.yml
+          name: linux-rpi-btf-${{ inputs.ver }}
+          path: 'repo'
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: aarch64
+          name: ${{ inputs.ver }}
+          files: |
+            repo/aarch64/*.pkg.tar.zst*
+      - name: clean release file
+        run: |
+          rm repo/aarch64/*.pkg.tar.zst*
+          echo -n "Welcome to FQEGG's repos!" >> repo/index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload entire repository
+          path: './repo'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

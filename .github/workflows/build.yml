@@ -1,0 +1,116 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
+
+jobs:
+  cross_build:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    name: build
+
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
+        with:
+          workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
+          name: prepare-${{ inputs.ver }}
+          path: '.'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: prepare.yml
+          name: prepare-${{ inputs.ver }}
+          path: '.'
+      - name: extruct workdir
+        run: |
+          tar -xzf workdir.tar.gz
+          rm workdir.tar.gz
+      - name: install deps
+        run: |
+          pacman -Syu --noconfirm --noprogressbar --needed \
+            aarch64-linux-gnu-binutils \
+            aarch64-linux-gnu-glibc \
+            aarch64-linux-gnu-gcc \
+            ccache \
+            rsync \
+            pahole python bc kmod inetutils
+      - name: get timestamp
+        id: timestamp
+        run: |
+          echo "timestamp=$(date +%s)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v4
+        id: cache-ccache
+        name: download ccache
+        with:
+          path: ./ccache
+          key: ccache-cross-${{ steps.timestamp.outputs.timestamp }}
+          restore-keys: |
+            ccache-cross-
+      - name: set ccache
+        run: |
+          echo "${PWD}"
+          if [ ! -d "${PWD}/ccache" ];then
+            mkdir ${PWD}/ccache
+            else
+            ls -la ${PWD}/ccache
+          fi
+          mv ${PWD}/ccache ${PWD}/ccache-run
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache-run
+          ccache --set-config=max_size=2.0G
+          ccache -s
+      - name: build
+        run: |
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache-run
+          ccache --set-config=max_size=2.0G
+          ccache -s
+          cd ./workdir/PKGBUILDs/core/linux-rpi
+          cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig V=s CC="ccache aarch64-linux-gnu-gcc" -B
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs -j5 V=s CC="ccache aarch64-linux-gnu-gcc"
+      - name: check ccache
+        if: ${{ always() }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          echo "${PWD}"
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache-run
+          ccache --set-config=max_size=2.0G
+          ccache -s
+          export CCACHE_DISABLE=1
+          rsync -a ./ccache-run/ ./ccache
+      - name: save ccache
+        if: ${{ always() }}
+        uses: actions/cache/save@v4
+        with:
+          path: ./ccache
+          key: ccache-cross-${{ steps.timestamp.outputs.timestamp }}
+      - name: Setup Output
+        run: |
+          cd $GITHUB_WORKSPACE
+          tar -czf - ./workdir/PKGBUILDs/core/linux-rpi | split -b 1G -d - workdir.tar.gz.
+      - name: Upload Repo
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ inputs.ver }}
+          path: './workdir.tar.gz.*'
