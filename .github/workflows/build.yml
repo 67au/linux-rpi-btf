@@ -28,7 +28,7 @@ jobs:
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
-            pacman -Sy gawk
+            pacman -Sy --noconfirm gawk
             rm -rf /etc/pacman.d/gnupg
             pacman-key --init
             pacman-key --populate archlinuxarm
