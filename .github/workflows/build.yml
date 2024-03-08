@@ -27,13 +27,14 @@ jobs:
             --volume "${PWD}/workdir:/workdir" --user alarm
           shell: /bin/bash
           install: |
+            sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
+            pacman -Sy gawk
             rm -rf /etc/pacman.d/gnupg
             pacman-key --init
             pacman-key --populate archlinuxarm
             pacman -Syu --noconfirm base-devel python
             groupadd users
             useradd alarm
-            sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
             sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
             sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
