@@ -1,0 +1,61 @@
+name: Build linux-rpi with BTF
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  alarm_build:
+    runs-on: ubuntu-latest
+    name: Build linux-rpi-btf
+
+    steps:
+      - name: Set workdir
+        run: |
+          mkdir -p ./workdir/repo
+      - uses: actions/checkout@v4
+        with:
+          repository: archlinuxarm/PKGBUILDs
+          path: './workdir/PKGBUILDs'
+      - uses: uraimo/run-on-arch-action@v2.7.1
+        name: Build Kernel
+        with:
+          arch: aarch64
+          distro: archarm_latest
+          githubToken: ${{ secrets.GH_PAT }}
+          dockerRunArgs: |
+            --volume "${PWD}/workdir:/workdir" --user alarm
+          shell: /bin/bash
+          install: |
+            sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
+            sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
+            sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
+            sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
+            sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
+            rm -rf /etc/pacman.d/gnupg
+            pacman-key --init
+            pacman-key --populate archlinuxarm
+            pacman -Syu --noconfirm base-devel python
+            groupadd users
+            useradd alarm
+            echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+          run: |
+            sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
+            sudo pacman-key --finger ${{ secrets.GPGKEY }}
+            sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
+            sudo chown alarm:alarm -R /workdir
+            cd /workdir/PKGBUILDs/core/linux-rpi
+            echo 'Hacking PKGBUILD'
+            sed -i "s#make olddefconfig#sed -i '/CONFIG_DEBUG_INFO/d;/CONFIG_RING_BUFFER/d;/CONFIG_TRACING/d;/CONFIG_STACKTRACE/d;/CONFIG_NOP_TRACER/d;/CONFIG_BINARY_PRINTF/d;/CONFIG_EVENT_TRACING/d;/CONFIG_TRACE_CLOCK/d;/CONFIG_TASKS_RCU/d' .config\nmake olddefconfig#" PKGBUILD
+            sed -i "s#make olddefconfig#echo 'CONFIG_DEBUG_INFO=y\nCONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y\nCONFIG_DEBUG_INFO_COMPRESSED_ZLIB=y\nCONFIG_DEBUG_INFO_BTF=y\nCONFIG_KPROBE_EVENTS=y\nCONFIG_BPF_EVENTS=y\nCONFIG_RING_BUFFER=y\nCONFIG_TRACING=y\nCONFIG_STACKTRACE=y\nCONFIG_NOP_TRACER=y\nCONFIG_BINARY_PRINTF=y\nCONFIG_EVENT_TRACING=y\nCONFIG_TRACE_CLOCK=y\nCONFIG_TASKS_RCU=y' >> .config\nmake olddefconfig#" PKGBUILD
+            sed -i "s#pkgbase=linux-rpi#pkgbase=linux-rpi-btf#" PKGBUILD
+            sed -i "s#linux-rpi-16k#linux-rpi\nlinux-rpi-16k#" PKGBUILD
+            makepkg -s --noconfirm --sign
+            mkdir -p /workdir/repo/aarch64
+            cp ./*.pkg.tar.zst /workdir/repo/aarch64
+            cd /workdir/repo/aarch64
+            repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: Upload Repo
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './workdir/repo'
