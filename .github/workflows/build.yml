@@ -53,7 +53,7 @@ jobs:
             sed -i "s#make olddefconfig#echo 'CONFIG_DEBUG_INFO=y\nCONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y\nCONFIG_DEBUG_INFO_COMPRESSED_ZLIB=y\nCONFIG_DEBUG_INFO_BTF=y\nCONFIG_KPROBE_EVENTS=y\nCONFIG_BPF_EVENTS=y\nCONFIG_RING_BUFFER=y\nCONFIG_TRACING=y\nCONFIG_STACKTRACE=y\nCONFIG_NOP_TRACER=y\nCONFIG_BINARY_PRINTF=y\nCONFIG_EVENT_TRACING=y\nCONFIG_TRACE_CLOCK=y\nCONFIG_TASKS_RCU=y' >> .config\nmake olddefconfig#" PKGBUILD
             sed -i "s#pkgbase=linux-rpi#pkgbase=linux-rpi-btf#" PKGBUILD
             sed -i "s#linux-rpi-16k#linux-rpi\nlinux-rpi-16k#" PKGBUILD
-            makepkg -s --noconfirm --sign
+            makepkg -s --noconfirm --sign --key
             mkdir -p /workdir/repo/aarch64
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
             cd /workdir/repo/aarch64
