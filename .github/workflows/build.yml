@@ -28,7 +28,7 @@ jobs:
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
-            pacman -Sy --noconfirm gawk
+            pacman -Syu --noconfirm gawk
             rm -rf /etc/pacman.d/gnupg
             pacman-key --init
             pacman-key --populate archlinuxarm
@@ -41,7 +41,7 @@ jobs:
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            cat /etc/makepkg.conf
+            rm -rf $HOME/.gnupg/
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
