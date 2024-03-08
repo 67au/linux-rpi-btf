@@ -32,6 +32,7 @@ jobs:
             rm -rf /etc/pacman.d/gnupg
             pacman-key --init
             pacman-key --populate archlinuxarm
+            pacman-key --lsign-key "builder@archlinuxarm.org"
             pacman -Syu --noconfirm base-devel python
             groupadd users
             useradd alarm
