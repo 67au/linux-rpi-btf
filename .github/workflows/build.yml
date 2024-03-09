@@ -81,6 +81,8 @@ jobs:
             echo "distccd" >> /etc/distcc/hosts
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
+            sudo chown alarm:alarm -R /workdir
+            sudo chown alarm:alarm -R /ccache
             export PATH="/usr/lib/ccache/bin/:$PATH"
             export CCACHE_DIR=/ccache
             ccache --set-config=max_size=2.0G
@@ -89,8 +91,6 @@ jobs:
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
-            sudo chown alarm:alarm -R /workdir
-            sudo chown alarm:alarm -R /ccache
             cd /workdir/PKGBUILDs/core/linux-rpi
             echo 'Hacking PKGBUILD'
             sed -i "s#make olddefconfig#sed -i '/CONFIG_DEBUG_INFO/d;/CONFIG_RING_BUFFER/d;/CONFIG_TRACING/d;/CONFIG_STACKTRACE/d;/CONFIG_NOP_TRACER/d;/CONFIG_BINARY_PRINTF/d;/CONFIG_EVENT_TRACING/d;/CONFIG_TRACE_CLOCK/d;/CONFIG_TASKS_RCU/d' .config\nmake olddefconfig#" PKGBUILD
