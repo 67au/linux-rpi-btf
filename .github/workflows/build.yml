@@ -90,6 +90,7 @@ jobs:
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
       - name: test cache
+        if: ${{ always() }}
         run: |
           ls
           ls ccache
