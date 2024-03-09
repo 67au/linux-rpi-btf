@@ -46,7 +46,7 @@ jobs:
             pacman-key --init
             pacman-key --populate archlinuxarm
             pacman-key --lsign-key "builder@archlinuxarm.org"
-            pacman -Syu --noconfirm base-devel python
+            pacman -Syu --noconfirm base-devel python pahole
             groupadd users
             useradd -m alarm
             sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
