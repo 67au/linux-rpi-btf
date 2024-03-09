@@ -47,7 +47,7 @@ jobs:
           distro: archarm_latest
           githubToken: ${{ secrets.GH_PAT }}
           dockerRunArgs: |
-            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/home/alarm/.cache/ccache" --user alarm
+            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/tmp/ccache" --user alarm
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -67,14 +67,14 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            sudo pacman -Syu --noconfirm iproute2
-            ip a
+            export PATH="/usr/lib/ccache/bin/:$PATH"
+            export CCACHE_DIR=/tmp/ccache
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
             sudo chown alarm:alarm -R /workdir
-            sudo chown alarm:alarm -R /home/alarm/.cache/ccache
+            sudo chown alarm:alarm -R /tmp/ccache
             cd /workdir/PKGBUILDs/core/linux-rpi
             echo 'Hacking PKGBUILD'
             sed -i "s#make olddefconfig#sed -i '/CONFIG_DEBUG_INFO/d;/CONFIG_RING_BUFFER/d;/CONFIG_TRACING/d;/CONFIG_STACKTRACE/d;/CONFIG_NOP_TRACER/d;/CONFIG_BINARY_PRINTF/d;/CONFIG_EVENT_TRACING/d;/CONFIG_TRACE_CLOCK/d;/CONFIG_TASKS_RCU/d' .config\nmake olddefconfig#" PKGBUILD
