@@ -48,7 +48,7 @@ jobs:
           distro: archarm_latest
           githubToken: ${{ secrets.GH_PAT }}
           dockerRunArgs: |
-            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/tmp/ccache" --user alarm
+            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/ccache" --user alarm
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -77,7 +77,7 @@ jobs:
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
             sudo chown alarm:alarm -R /workdir
-            sudo chown alarm:alarm -R /tmp/ccache
+            sudo chown alarm:alarm -R /ccache
             cd /workdir/PKGBUILDs/core/linux-rpi
             echo 'Hacking PKGBUILD'
             sed -i "s#make olddefconfig#sed -i '/CONFIG_DEBUG_INFO/d;/CONFIG_RING_BUFFER/d;/CONFIG_TRACING/d;/CONFIG_STACKTRACE/d;/CONFIG_NOP_TRACER/d;/CONFIG_BINARY_PRINTF/d;/CONFIG_EVENT_TRACING/d;/CONFIG_TRACE_CLOCK/d;/CONFIG_TASKS_RCU/d' .config\nmake olddefconfig#" PKGBUILD
