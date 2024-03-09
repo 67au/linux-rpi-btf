@@ -100,7 +100,8 @@ jobs:
             sed -i 's#make "$_image" modules dtbs#CCACHE_PREFIX=distcc make "$_image" modules dtbs#' PKGBUILD
             sed -i "s#prepare() {#prepare() {\nmv ../linux-rpi.install ../linux-rpi-btf.install#" PKGBUILD
             sed -i "s#pkgbase=linux-rpi#pkgbase=linux-rpi-btf#" PKGBUILD
-            sed -i "s#linux-rpi-16k#linux-rpi\nlinux-rpi-16k#" PKGBUILD
+            sed -i "s#linux-rpi-16k\n#linux-rpi\nlinux-rpi-16k\n#" PKGBUILD
+            sed -i "s#'linux-headers'#'linux-headers' 'linux-rpi-headers'#" PKGBUILD
             makepkg -s --noconfirm --sign
             mkdir -p /workdir/repo/aarch64
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
