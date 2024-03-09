@@ -27,11 +27,15 @@ jobs:
         run: |
           mkdir -p ./workdir/repo
       - uses: actions/cache@v4
+        id: cache-ccache
         name: setup ccache
         with:
-          path: "ccache"
+          path: "./ccache"
           key: ccache
-          restore-keys: ccache
+      - name: not hit cache
+        if: steps.cache-ccache.outputs.cache-hit != 'true'
+        run: |
+          mkdir ./ccache
       - uses: actions/checkout@v4
         with:
           repository: archlinuxarm/PKGBUILDs
@@ -84,10 +88,10 @@ jobs:
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
       - name: save ccache
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         uses: actions/cache@v4
         with:
-          path: "ccache"
+          path: "./ccache"
           key: ccache
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
