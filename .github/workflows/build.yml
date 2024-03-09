@@ -65,7 +65,7 @@ jobs:
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
             sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color ccache check sign)/" /etc/makepkg.conf
-            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="127.0.0.1\/4:3632"/' /etc/makepkg.conf
+            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
             export PATH="/usr/lib/ccache/bin/:$PATH"
