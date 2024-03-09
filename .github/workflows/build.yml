@@ -26,6 +26,11 @@ jobs:
       - name: Set workdir
         run: |
           mkdir -p ./workdir/repo
+      - uses: actions/cache@v4
+        name: setup ccache
+        with:
+          path: "ccache"
+          restore-keys: ccache
       - uses: actions/checkout@v4
         with:
           repository: archlinuxarm/PKGBUILDs
@@ -37,7 +42,7 @@ jobs:
           distro: archarm_latest
           githubToken: ${{ secrets.GH_PAT }}
           dockerRunArgs: |
-            --volume "${PWD}/workdir:/workdir" --user alarm
+            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/home/alarm/.ccache" --user alarm
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -46,14 +51,14 @@ jobs:
             pacman-key --init
             pacman-key --populate archlinuxarm
             pacman-key --lsign-key "builder@archlinuxarm.org"
-            pacman -Syu --noconfirm base-devel python pahole
+            pacman -Syu --noconfirm base-devel python pahole ccache distcc
             groupadd users
             useradd -m alarm
             sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
             sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
-            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color !ccache check sign)/" /etc/makepkg.conf
+            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color ccache check sign)/" /etc/makepkg.conf
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
@@ -74,6 +79,12 @@ jobs:
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: save ccache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: "ccache"
+          key: ccache
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
         with:
