@@ -16,6 +16,9 @@ jobs:
     services:
       distccd:
         image: ghcr.io/67au/distccd-aarch64
+        credentials:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_PAT }}
         ports:
           - 3636:3636
 
