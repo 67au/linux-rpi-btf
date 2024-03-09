@@ -64,7 +64,8 @@ jobs:
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
             sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color ccache check sign)/" /etc/makepkg.conf
-            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
+            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="172.17.0.1\/4:3632"/' /etc/makepkg.conf
+            echo "172.17.0.1" >> /etc/distcc/hosts
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
             export PATH="/usr/lib/ccache/bin/:$PATH"
@@ -89,11 +90,6 @@ jobs:
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
-      - name: test cache
-        if: ${{ always() }}
-        run: |
-          ls
-          ls ccache
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache@v4
