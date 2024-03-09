@@ -8,7 +8,6 @@ jobs:
   alarm_build:
     runs-on: ubuntu-latest
     name: Build linux-rpi-btf
-    container: archlinux:base-devel
 
     permissions:
       contents: read
