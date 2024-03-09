@@ -71,7 +71,6 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            curl http://caddy
             curl http://localhost
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
@@ -93,6 +92,10 @@ jobs:
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: test cache
+        run: |
+          ls
+          ls ccache
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache@v4
