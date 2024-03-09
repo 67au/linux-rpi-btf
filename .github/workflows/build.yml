@@ -15,7 +15,7 @@ jobs:
 
     services:
       distccd:
-        image: ghcr.io/67au/distccd-aarch64
+        image: ghcr.io/67au/distccd-aarch64:master
         credentials:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GH_PAT }}
