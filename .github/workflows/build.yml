@@ -30,7 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ccache
           echo "timestamp=$(date +%s)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
         id: cache-ccache
         name: setup ccache
         with:
@@ -116,12 +116,10 @@ jobs:
           ccache -s
       - name: save ccache
         if: ${{ always() }}
-        uses: actions/cache@v4
+        uses: actions/cache/save@v4
         with:
-          path: |
-            ./ccache
+          path: ./ccache
           key: ccache-${{ steps.setup.outputs.timestamp }}
-          save-always: true
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
         with:
