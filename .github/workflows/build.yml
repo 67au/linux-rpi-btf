@@ -35,7 +35,7 @@ jobs:
             pacman-key --lsign-key "builder@archlinuxarm.org"
             pacman -Syu --noconfirm base-devel python
             groupadd users
-            useradd alarm
+            useradd -m alarm
             sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
             sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
