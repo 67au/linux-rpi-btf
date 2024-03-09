@@ -63,7 +63,7 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            cat /etc/makepkg.conf
+            sudo update-distcc-symlinks
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
