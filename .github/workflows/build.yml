@@ -43,7 +43,7 @@ jobs:
           distro: archarm_latest
           githubToken: ${{ secrets.GH_PAT }}
           dockerRunArgs: |
-            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/home/alarm/.ccache" --user alarm
+            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/home/alarm/.cache/ccache" --user alarm
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -63,6 +63,7 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
+            cat /etc/makepkg.conf
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
@@ -75,7 +76,6 @@ jobs:
             sed -i 's#make "$_image" modules dtbs#DISTCC_VERBOSE=1 make "$_image" modules dtbs CC=distcc CXX=distcc#' PKGBUILD
             sed -i "s#pkgbase=linux-rpi#pkgbase=linux-rpi-btf#" PKGBUILD
             sed -i "s#linux-rpi-16k#linux-rpi\nlinux-rpi-16k#" PKGBUILD
-            cat PKGBUILD
             makepkg -s --noconfirm --sign
             mkdir -p /workdir/repo/aarch64
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
