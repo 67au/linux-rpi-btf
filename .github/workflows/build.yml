@@ -8,6 +8,7 @@ jobs:
   alarm_build:
     runs-on: ubuntu-latest
     name: Build linux-rpi-btf
+    container: archlinux:base-devel
 
     permissions:
       contents: read
@@ -24,19 +25,31 @@ jobs:
 
     steps:
       - name: Set workdir
+        id: setup
         run: |
           mkdir -p ./workdir/repo
+          apt-get update
+          apt-get install -y ccache
+          echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT"
       - uses: actions/cache@v4
         id: cache-ccache
         name: setup ccache
         with:
           path: ./ccache
-          key: ccache
+          key: ccache-${{ steps.setup.outputs.timestamp }}
+          restore-keys: |
+            ccache-
       - name: not hit cache
         if: steps.cache-ccache.outputs.cache-hit != 'true'
         run: |
           mkdir ./ccache
-          touch ./ccache/.keep
+      - name: set ccache
+        run: |
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=./ccache
+          ccache --set-config=max_size=2.0G
+          ccache -s
+          
       - uses: actions/checkout@v4
         with:
           repository: archlinuxarm/PKGBUILDs
@@ -70,7 +83,7 @@ jobs:
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
             export PATH="/usr/lib/ccache/bin/:$PATH"
-            export CCACHE_DIR=/tmp/ccache
+            export CCACHE_DIR=/ccache
             ccache --set-config=max_size=2.0G
             ccache -s
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
@@ -93,12 +106,16 @@ jobs:
             cp ./*.pkg.tar.zst /workdir/repo/aarch64
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: check ccache
+        if: ${{ always() }}
+        run: |
+          ccache -s
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache@v4
         with:
           path: ./ccache
-          key: ccache
+          key: ccache-${{ steps.setup.outputs.timestamp }}
           save-always: true
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
