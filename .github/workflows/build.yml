@@ -45,7 +45,7 @@ jobs:
       - name: set ccache
         run: |
           export PATH="/usr/lib/ccache/bin/:$PATH"
-          export CCACHE_DIR=./ccache
+          export CCACHE_DIR=${PWD}/ccache
           ccache --set-config=max_size=2.0G
           ccache -s
           
@@ -108,6 +108,9 @@ jobs:
       - name: check ccache
         if: ${{ always() }}
         run: |
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache
+          ccache --set-config=max_size=2.0G
           ccache -s
       - name: save ccache
         if: ${{ always() }}
