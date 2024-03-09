@@ -21,6 +21,10 @@ jobs:
           password: ${{ secrets.GH_PAT }}
         ports:
           - 3632:3632
+      caddy:
+        image: caddy
+        ports:
+          - 80:80
 
     steps:
       - name: Set workdir
@@ -67,6 +71,8 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
+            curl http://caddy
+            curl http://localhost
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
