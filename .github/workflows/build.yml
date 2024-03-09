@@ -43,11 +43,10 @@ jobs:
             sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(!distcc color !ccache check sign)/" /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            rm -rf $HOME/.gnupg/
+            echo -n "${{ secrets.GPG_SIGNING_KEY }}" | base64 --decode | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
-            sudo pacman-key --refresh-keys
             sudo chown alarm:alarm -R /workdir
             cd /workdir/PKGBUILDs/core/linux-rpi
             echo 'Hacking PKGBUILD'
