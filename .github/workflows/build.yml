@@ -117,7 +117,7 @@ jobs:
           ccache --set-config=max_size=2.0G
           ccache -s
           export CCACHE_DISABLE=1
-          rsync -a ./ccache-run ./ccache
+          rsync -a ./ccache-run/ ./ccache
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache/save@v4
