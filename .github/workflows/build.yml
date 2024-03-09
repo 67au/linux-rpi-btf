@@ -45,8 +45,9 @@ jobs:
             else
             ls -la ${PWD}/ccache
           fi
+          mv ${PWD}/ccache ${PWD}/ccache-run
           export PATH="/usr/lib/ccache/bin/:$PATH"
-          export CCACHE_DIR=${PWD}/ccache
+          export CCACHE_DIR=${PWD}/ccache-run
           ccache --set-config=max_size=2.0G
           ccache -s
           
@@ -61,7 +62,7 @@ jobs:
           distro: archarm_latest
           githubToken: ${{ secrets.GH_PAT }}
           dockerRunArgs: |
-            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache:/ccache" --user alarm
+            --volume "${PWD}/workdir:/workdir" --volume "${PWD}/ccache-run:/ccache" --user alarm
           shell: /bin/bash
           install: |
             sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -112,16 +113,16 @@ jobs:
         run: |
           sudo chown runner:docker -R ${PWD}/ccache
           export PATH="/usr/lib/ccache/bin/:$PATH"
-          export CCACHE_DIR=${PWD}/ccache
+          export CCACHE_DIR=${PWD}/ccache-run
           ccache --set-config=max_size=2.0G
           ccache -s
           export CCACHE_DISABLE=1
-          rsync -a ./ccache ./ccache-bak
+          rsync -a ./ccache-run ./ccache
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache/save@v4
         with:
-          path: ./ccache-bak
+          path: ./ccache
           key: ccache-${{ steps.setup.outputs.timestamp }}
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
