@@ -109,7 +109,7 @@ jobs:
       - name: check ccache
         if: ${{ always() }}
         run: |
-          sudo chown github:github -R ${PWD}/ccache
+          sudo chown runner:docker -R ${PWD}/ccache
           export PATH="/usr/lib/ccache/bin/:$PATH"
           export CCACHE_DIR=${PWD}/ccache
           ccache --set-config=max_size=2.0G
