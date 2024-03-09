@@ -9,6 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Build linux-rpi-btf
 
+    services:
+      distccd:
+        image: ghcr.io/67au/distccd-aarch64
+        ports:
+          - 3636:3636
+
     steps:
       - name: Set workdir
         run: |
@@ -40,7 +46,8 @@ jobs:
             sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
-            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(!distcc color !ccache check sign)/" /etc/makepkg.conf
+            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color !ccache check sign)/" /etc/makepkg.conf
+            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd/4:3636"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
@@ -52,6 +59,7 @@ jobs:
             echo 'Hacking PKGBUILD'
             sed -i "s#make olddefconfig#sed -i '/CONFIG_DEBUG_INFO/d;/CONFIG_RING_BUFFER/d;/CONFIG_TRACING/d;/CONFIG_STACKTRACE/d;/CONFIG_NOP_TRACER/d;/CONFIG_BINARY_PRINTF/d;/CONFIG_EVENT_TRACING/d;/CONFIG_TRACE_CLOCK/d;/CONFIG_TASKS_RCU/d' .config\nmake olddefconfig#" PKGBUILD
             sed -i "s#make olddefconfig#echo 'CONFIG_DEBUG_INFO=y\nCONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y\nCONFIG_DEBUG_INFO_COMPRESSED_ZLIB=y\nCONFIG_DEBUG_INFO_BTF=y\nCONFIG_KPROBE_EVENTS=y\nCONFIG_BPF_EVENTS=y\nCONFIG_RING_BUFFER=y\nCONFIG_TRACING=y\nCONFIG_STACKTRACE=y\nCONFIG_NOP_TRACER=y\nCONFIG_BINARY_PRINTF=y\nCONFIG_EVENT_TRACING=y\nCONFIG_TRACE_CLOCK=y\nCONFIG_TASKS_RCU=y' >> .config\nmake olddefconfig#" PKGBUILD
+            sed -i 's#make "$_image" modules dtbs#make "$_image" modules dtbs CC=distcc CXX=distcc#' PKGBUILD
             sed -i "s#pkgbase=linux-rpi#pkgbase=linux-rpi-btf#" PKGBUILD
             sed -i "s#linux-rpi-16k#linux-rpi\nlinux-rpi-16k#" PKGBUILD
             makepkg -s --noconfirm --sign
