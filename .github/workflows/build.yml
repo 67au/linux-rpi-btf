@@ -67,6 +67,7 @@ jobs:
             sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
+            pacman -Syu --noconfirm inetutils
             ip a
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
