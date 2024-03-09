@@ -30,6 +30,7 @@ jobs:
         name: setup ccache
         with:
           path: "ccache"
+          key: ccache
           restore-keys: ccache
       - uses: actions/checkout@v4
         with:
