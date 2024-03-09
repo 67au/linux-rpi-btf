@@ -35,7 +35,7 @@ jobs:
         name: setup ccache
         with:
           path: ./ccache
-          key: ccache-${{ steps.setup.outputs.timestamp }}
+          key: ccache
           restore-keys: |
             ccache-
       - name: set ccache
@@ -122,7 +122,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ./ccache-bak
-          key: ccache-${{ steps.setup.outputs.timestamp }}
+          key: ccache
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
         with:
