@@ -70,6 +70,8 @@ jobs:
           run: |
             export PATH="/usr/lib/ccache/bin/:$PATH"
             export CCACHE_DIR=/tmp/ccache
+            ccache --set-config=max_size=2.0G
+            ccache -s
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
