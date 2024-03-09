@@ -93,6 +93,7 @@ jobs:
         with:
           path: "./ccache"
           key: ccache
+          save-always: true
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
         with:
