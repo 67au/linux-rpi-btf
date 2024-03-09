@@ -31,11 +31,12 @@ jobs:
         name: setup ccache
         with:
           path: ./ccache
-          key: ${{ runner.os }}-${{ hashFiles('./ccache') }}
+          key: ccache
       - name: not hit cache
         if: steps.cache-ccache.outputs.cache-hit != 'true'
         run: |
           mkdir ./ccache
+          touch ./ccache/.keep
       - uses: actions/checkout@v4
         with:
           repository: archlinuxarm/PKGBUILDs
@@ -95,7 +96,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./ccache
-          key: ${{ runner.os }}-${{ hashFiles('./ccache') }}
+          key: ccache
           save-always: true
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
