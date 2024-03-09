@@ -20,7 +20,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GH_PAT }}
         ports:
-          - 3636:3636
+          - 3632:3632
 
     steps:
       - name: Set workdir
@@ -54,7 +54,7 @@ jobs:
             sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
             sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
             sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(distcc color !ccache check sign)/" /etc/makepkg.conf
-            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd/4:3636"/' /etc/makepkg.conf
+            sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="distccd\/4:3632"/' /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
             echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
