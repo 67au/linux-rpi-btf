@@ -82,7 +82,7 @@ jobs:
             cd /workdir/repo/aarch64
             repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
       - name: save ccache
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         uses: actions/cache@v4
         with:
           path: "ccache"
