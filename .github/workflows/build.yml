@@ -44,6 +44,7 @@ jobs:
           mkdir ./ccache
       - name: set ccache
         run: |
+          ls -la ${PWD}/ccache
           export PATH="/usr/lib/ccache/bin/:$PATH"
           export CCACHE_DIR=${PWD}/ccache
           ccache --set-config=max_size=2.0G
