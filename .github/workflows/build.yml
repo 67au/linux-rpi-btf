@@ -38,13 +38,8 @@ jobs:
           key: ccache-${{ steps.setup.outputs.timestamp }}
           restore-keys: |
             ccache-
-      - name: not hit cache
-        if: steps.cache-ccache.outputs.cache-hit != 'true'
-        run: |
-          mkdir ./ccache
       - name: set ccache
         run: |
-          mv ${PWD}/ccache-bak ${PWD}/ccache
           ls -la ${PWD}/ccache
           export PATH="/usr/lib/ccache/bin/:$PATH"
           export CCACHE_DIR=${PWD}/ccache
