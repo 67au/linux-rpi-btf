@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p ./workdir/repo
           sudo apt-get update
-          sudo apt-get install -y ccache
+          sudo apt-get install -y ccache rsync
           echo "timestamp=$(date +%s)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@v4
         id: cache-ccache
@@ -114,11 +114,13 @@ jobs:
           export CCACHE_DIR=${PWD}/ccache
           ccache --set-config=max_size=2.0G
           ccache -s
+          export CCACHE_DISABLE=1
+          rsync -a ./ccache ./ccache-bak
       - name: save ccache
         if: ${{ always() }}
         uses: actions/cache/save@v4
         with:
-          path: ./ccache
+          path: ./ccache-bak
           key: ccache-${{ steps.setup.outputs.timestamp }}
       - name: Upload Repo
         uses: actions/upload-pages-artifact@v3
