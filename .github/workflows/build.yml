@@ -30,8 +30,8 @@ jobs:
         id: cache-ccache
         name: setup ccache
         with:
-          path: "./ccache"
-          key: ${{ runner.os }}-${{ hashFiles('./ccache') }}
+          path: ./ccache
+          key: ${{ runner.os }}-${{ hashFiles('ccache') }}
       - name: not hit cache
         if: steps.cache-ccache.outputs.cache-hit != 'true'
         run: |
@@ -97,7 +97,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/cache@v4
         with:
-          path: "./ccache"
+          path: ./ccache
           key: ${{ runner.os }}-${{ hashFiles('./ccache') }}
           save-always: true
       - name: Upload Repo
