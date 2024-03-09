@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Build linux-rpi-btf
 
+    permissions:
+      contents: read
+      packages: read
+
     services:
       distccd:
         image: ghcr.io/67au/distccd-aarch64
