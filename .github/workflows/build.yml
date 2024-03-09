@@ -43,7 +43,7 @@ jobs:
             sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(!distcc color !ccache check sign)/" /etc/makepkg.conf
             echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
           run: |
-            echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
+            echo -n "${{ secrets.GPG_SIGNING_KEY }}" | sudo pacman-key --add -
             sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
             sudo pacman-key --finger ${{ secrets.GPGKEY }}
             sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
