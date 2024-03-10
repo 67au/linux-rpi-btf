@@ -60,6 +60,24 @@ jobs:
     needs: [setup, prepare, build, makepkg]
     runs-on: ubuntu-latest
     steps:
-      - name: release
-        run: |
-          echo ''
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
+        with:
+          workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
+          name: linux-rpi-btf-${{ needs.prepare.outputs.ver }}
+          path: 'repo'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: release.yml
+          name: linux-rpi-btf-${{ needs.prepare.outputs.ver }}
+          path: 'repo'
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            repo/aarch64/linux-rpi-btf-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
+            repo/aarch64/linux-rpi-btf-headers-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
