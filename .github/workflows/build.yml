@@ -26,7 +26,7 @@ jobs:
         with:
           workflow: prepare.yml
           name: prepare-${{ inputs.ver }}
-          path: './workdir.tar.gz'
+          path: '.'
       - name: extruct workdir
         run: |
           tar -xzf workdir.tar.gz
