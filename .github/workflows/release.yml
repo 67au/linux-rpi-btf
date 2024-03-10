@@ -74,6 +74,7 @@ jobs:
             cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
             
             echo "rebuild scripts"
+            rm scripts/basic/fixdep
             make tools/clean
             make prepare -j4
             
