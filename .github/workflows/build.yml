@@ -2,11 +2,16 @@ name: Build
 
 on:
   workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
   workflow_call:
     inputs:
       ver:
         description: "package ver"
-        required: false
+        required: true
         type: string
 
 jobs:
