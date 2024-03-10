@@ -13,11 +13,11 @@ jobs:
     needs: prepare
     uses: ./.github/workflows/build.yml
     with:
-      ver: ${{ jobs.prepare.outputs.ver }}
+      ver: ${{ needs.prepare.outputs.ver }}
 
   makepkg:
     name: Makepkg
-    needs: build
+    needs: [prepare, build]
     uses: ./.github/workflows/makepkg.yml
     with:
-      ver: ${{ jobs.prepare.outputs.ver }}
+      ver: ${{ needs.prepare.outputs.ver }}
