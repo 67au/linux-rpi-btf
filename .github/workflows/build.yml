@@ -54,6 +54,7 @@ jobs:
             ccache-cross-
       - name: set ccache
         run: |
+          echo "${PWD}"
           if [ ! -d "${PWD}/ccache" ];then
             mkdir ${PWD}/ccache
             else
@@ -66,6 +67,10 @@ jobs:
           ccache -s
       - name: build
         run: |
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache-run
+          ccache --set-config=max_size=2.0G
+          ccache -s
           cd ./workdir/PKGBUILDs/core/linux-rpi
           cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
           make clean
@@ -75,6 +80,7 @@ jobs:
         if: ${{ always() }}
         run: |
           cd $GITHUB_WORKSPACE
+          echo "${PWD}"
           export PATH="/usr/lib/ccache/bin/:$PATH"
           export CCACHE_DIR=${PWD}/ccache-run
           ccache --set-config=max_size=2.0G
