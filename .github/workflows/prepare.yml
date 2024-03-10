@@ -78,10 +78,10 @@ jobs:
           sudo chown runner:docker -R ./workdir
           cat ./workdir/pkgver >> "$GITHUB_OUTPUT"
           cat ./workdir/pkgver
-          tar -czf workdir.tar.gz ./workdir
+          tar -czf linux.tar.gz ./workdir/PKGBUILDs/core/linux-rpi
       - name: Upload Repo
         uses: actions/upload-artifact@v4
         with:
           name: prepare-${{ steps.prepare.outputs.ver }}
-          path: './workdir.tar.gz'
+          path: './linux.tar.gz'
           
