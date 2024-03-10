@@ -38,5 +38,5 @@ jobs:
     needs: check-update
     name: Trigger build
     if: needs.check-update.outputs.output != 'true'
-    uses: ./.github/workflows/prepare.yml
+    uses: ./.github/workflows/release.yml
   
