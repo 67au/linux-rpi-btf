@@ -1,4 +1,4 @@
-name: Prepare linux source
+name: Release
 
 on:
   workflow_dispatch:
