@@ -75,18 +75,15 @@ jobs:
             
             echo "rebuild scripts"
             rm scripts/basic/fixdep
-            rm scripts/dtc/flattree.o
             rm scripts/dtc/dtc.o
             rm scripts/dtc/fstree.o
             rm scripts/dtc/data.o
-            rm scripts/dtc/treesource.o
             rm scripts/dtc/livetree.o
+            rm scripts/dtc/flattree.o
+            rm scripts/dtc/treesource.o
             rm scripts/dtc/srcpos.o
             rm scripts/dtc/checks.o
             rm scripts/dtc/util.o
-            rm scripts/dtc/dtc-lexer.lex.c
-            rm scripts/dtc/dtc-parser.tab.c
-            rm scripts/dtc/dtc-parser.tab.h
             rm scripts/dtc/libfdt/fdt.o
             rm scripts/dtc/libfdt/fdt_ro.o
             rm scripts/dtc/libfdt/fdt_wip.o
@@ -99,13 +96,13 @@ jobs:
             rm scripts/dtc/fdtoverlay.o
             rm scripts/dtc/dtc-lexer.lex.o
             rm scripts/dtc/dtc-parser.tab.o
-            rm scripts/dtc/fdtoverlay
-            rm scripts/dtc/dtc
-            rm scripts/sorttable
             rm scripts/kallsyms
+            rm scripts/sorttable
             rm scripts/asn1_compiler
             rm scripts/mod/mk_elfconfig
-            rm scripts/mod/*.o
+            rm scripts/mod/modpost.o
+            rm scripts/mod/file2alias.o
+            rm scripts/mod/sumversion.o
             make olddefconfig -B
             make prepare -j4
             
