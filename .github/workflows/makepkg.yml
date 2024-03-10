@@ -24,10 +24,18 @@ jobs:
     steps:
       - name: download artifact
         uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
         with:
-          workflow_search: true
+          workflow: ${{ inputs.workflow }}
           name: build-${{ inputs.ver }}
-          path: '.' 
+          path: '.'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: build.yml
+          name: build-${{ inputs.ver }}
+          path: '.'
       - name: extract artifact
         run: |
           cat workdir.tar.gz.* > workdir.tar.gz
