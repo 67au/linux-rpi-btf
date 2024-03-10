@@ -75,10 +75,12 @@ jobs:
       - name: set output
         id: set_output
         run: |
+          sudo chown runner:docker -R ./workdir
           cat ./workdir/pkgver >> "$GITHUB_OUTPUT"
+          tar -czf ./workdir workdir.tar.gz
       - name: Upload Repo
         uses: actions/upload-artifact@v4
         with:
           name: prepare-${{ steps.prepare.outputs.ver }}
-          path: './workdir'
+          path: './workdir.tar.gz'
           
