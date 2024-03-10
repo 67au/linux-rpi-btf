@@ -49,6 +49,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.ver }}
+          name: ${{ inputs.ver }}
           files: |
-            aarch64/linux-rpi-btf-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
-            aarch64/linux-rpi-btf-headers-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
+            aarch64/linux-rpi-btf-${{ inputs.ver }}-aarch64.pkg.tar.zst
+            aarch64/linux-rpi-btf-headers-${{ inputs.ver }}-aarch64.pkg.tar.zst
