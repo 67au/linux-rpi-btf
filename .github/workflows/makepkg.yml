@@ -1,4 +1,4 @@
-name: Release
+name: Makepkg
 
 on:
   workflow_dispatch:
@@ -15,15 +15,11 @@ on:
         type: string
 
 jobs:
-  alarm_release:
+  alarm_makepkg:
     runs-on: ubuntu-latest
-    name: Release
+    name: Makepkg Rebuild
     outputs:
       ver: ${{ steps.set_output.outputs.ver }}
-
-    permissions:
-      contents: read
-      packages: read
 
     steps:
       - name: download artifact
