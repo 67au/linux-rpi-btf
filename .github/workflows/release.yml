@@ -104,6 +104,7 @@ jobs:
             rm scripts/sorttable
             rm scripts/kallsyms
             rm scripts/asn1_compiler
+            rm scripts/mod/mk_elfconfig
             make olddefconfig -B
             make scripts
             
