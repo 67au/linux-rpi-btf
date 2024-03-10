@@ -2,6 +2,15 @@ name: Release Test
 
 on:
   workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
   workflow_call:
     inputs:
       ver:
