@@ -73,8 +73,7 @@ jobs:
           ccache -s
           cd ./workdir/PKGBUILDs/core/linux-rpi
           cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
-          make clean
-          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig V=s CC="ccache aarch64-linux-gnu-gcc"
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig V=s CC="ccache aarch64-linux-gnu-gcc" -B
           make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs -j5 V=s CC="ccache aarch64-linux-gnu-gcc"
       - name: check ccache
         if: ${{ always() }}
