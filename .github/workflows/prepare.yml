@@ -77,6 +77,7 @@ jobs:
         run: |
           sudo chown runner:docker -R ./workdir
           cat ./workdir/pkgver >> "$GITHUB_OUTPUT"
+          cat ./workdir/pkgver
           tar -czf workdir.tar.gz ./workdir
       - name: Upload Repo
         uses: actions/upload-artifact@v4
