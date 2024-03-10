@@ -75,10 +75,10 @@ jobs:
       - name: set output
         id: set_output
         run: |
-          cat /workdir/pkgver >> "$GITHUB_OUTPUT"
+          cat ./workdir/pkgver >> "$GITHUB_OUTPUT"
       - name: Upload Repo
         uses: actions/upload-artifact@v4
         with:
           name: prepare-${{ steps.prepare.outputs.ver }}
-          path: './workdir/repo'
+          path: './workdir'
           
