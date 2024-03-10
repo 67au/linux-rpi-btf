@@ -32,6 +32,11 @@ jobs:
           workflow: build.yml
           name: build-${{ inputs.ver }}
           path: '.' 
+      - name: extract artifact
+        run: |
+          cat workdir.tar.gz.* > workdir.tar.gz
+          rm -r workdir.tar.gz.*
+          tar -xzf workdir.tar.gz
       - uses: uraimo/run-on-arch-action@v2.7.1
         name: Prepare only
         id: prepare
@@ -67,8 +72,41 @@ jobs:
             cd /workdir/PKGBUILDs/core/linux-rpi
             sudo rm -rf pkg
             cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
-            make scripts clean
+            
+            echo "rebuild scripts"
+            rm scripts/basic/fixdep
+            rm scripts/dtc/flattree.o
+            rm scripts/dtc/dtc.o
+            rm scripts/dtc/fstree.o
+            rm scripts/dtc/data.o
+            rm scripts/dtc/treesource.o
+            rm scripts/dtc/livetree.o
+            rm scripts/dtc/srcpos.o
+            rm scripts/dtc/checks.o
+            rm scripts/dtc/util.o
+            rm scripts/dtc/dtc-lexer.lex.c
+            rm scripts/dtc/dtc-parser.tab.c
+            rm scripts/dtc/dtc-parser.tab.h
+            rm scripts/dtc/libfdt/fdt.o
+            rm scripts/dtc/libfdt/fdt_ro.o
+            rm scripts/dtc/libfdt/fdt_wip.o
+            rm scripts/dtc/libfdt/fdt_sw.o
+            rm scripts/dtc/libfdt/fdt_rw.o
+            rm scripts/dtc/libfdt/fdt_strerror.o
+            rm scripts/dtc/libfdt/fdt_empty_tree.o
+            rm scripts/dtc/libfdt/fdt_addresses.o
+            rm scripts/dtc/libfdt/fdt_overlay.o
+            rm scripts/dtc/fdtoverlay.o
+            rm scripts/dtc/dtc-lexer.lex.o
+            rm scripts/dtc/dtc-parser.tab.o
+            rm scripts/dtc/fdtoverlay
+            rm scripts/dtc/dtc
+            rm scripts/sorttable
+            rm scripts/kallsyms
+            rm scripts/asn1_compiler
+            make olddefconfig -B
             make scripts
+            
             cd /workdir/PKGBUILDs/core/linux-rpi
             makepkg -s --noconfirm --nodeps --sign -R
             mkdir -p /workdir/repo/aarch64
