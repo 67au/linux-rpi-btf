@@ -30,6 +30,7 @@ jobs:
         if: inputs.workflow != ''
         with:
           workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
           name: prepare-${{ inputs.ver }}
           path: '.'
       - name: download artifact
