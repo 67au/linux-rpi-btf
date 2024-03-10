@@ -100,5 +100,5 @@ jobs:
       - name: Upload Repo
         uses: actions/upload-artifact@v4
         with:
-          name: prepare-${{ inputs.ver }}
+          name: build-${{ inputs.ver }}
           path: './workdir.tar.gz'
