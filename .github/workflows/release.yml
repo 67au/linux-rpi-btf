@@ -17,7 +17,7 @@ on:
 jobs:
   alarm_release:
     runs-on: ubuntu-latest
-    name: Prepare linux source
+    name: Release
     outputs:
       ver: ${{ steps.set_output.outputs.ver }}
 
