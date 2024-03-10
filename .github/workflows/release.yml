@@ -120,5 +120,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 'linux-rpi-btf'
+          name: 'linux-rpi-btf-${{ inputs.ver }}'
           path: './repo'
