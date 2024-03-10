@@ -107,7 +107,7 @@ jobs:
             rm scripts/mod/mk_elfconfig
             rm scripts/mod/*.o
             make olddefconfig -B
-            make scripts modules_prepare -j4
+            make dtbs_prepare modules_prepare -j4
             
             cd /workdir/PKGBUILDs/core/linux-rpi
             makepkg -s --noconfirm --nodeps --sign -R
