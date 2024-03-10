@@ -103,6 +103,7 @@ jobs:
             rm scripts/mod/modpost.o
             rm scripts/mod/file2alias.o
             rm scripts/mod/sumversion.o
+            make tools/clean
             make olddefconfig -B
             make prepare -j4
             
