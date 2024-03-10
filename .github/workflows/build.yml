@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: false
+        type: string
+
+jobs:
+  cross_build:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    name: build
+
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: prepare.yml
+          name: prepare-${{ inputs.ver }}
+          path: './workdir.tar.gz'
+      - name: extruct workdir
+        run: |
+          tar -xzf workdir.tar.gz
+          rm workdir.tar.gz
+      - name: install deps
+        run: |
+          pacman -Syu --noconfirm --noprogressbar --needed \
+            aarch64-linux-gnu-binutils
+            aarch64-linux-gnu-glibc
+            aarch64-linux-gnu-gcc
+            ccache
+      - name: build
+        run: |
+          cd ./workdir/PKGBUILDs/core/linux-rpi
+          cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
+          
+          
