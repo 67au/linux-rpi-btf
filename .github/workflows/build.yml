@@ -74,6 +74,10 @@ jobs:
       - name: check ccache
         if: ${{ always() }}
         run: |
+          cd $GITHUB_WORKSPACE
+          export PATH="/usr/lib/ccache/bin/:$PATH"
+          export CCACHE_DIR=${PWD}/ccache-run
+          ccache --set-config=max_size=2.0G
           ccache -s
           export CCACHE_DISABLE=1
           rsync -a ./ccache-run/ ./ccache
@@ -82,7 +86,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ./ccache
-          key: ccache-cross-${{ steps.setup.outputs.timestamp }}
+          key: ccache-cross-${{ steps.timestamp.outputs.timestamp }}
       - name: Setup Output
         run: |
           cd $GITHUB_WORKSPACE
