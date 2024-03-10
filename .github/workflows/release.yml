@@ -29,3 +29,9 @@ jobs:
     with:
       ver: ${{ needs.prepare.outputs.ver }}
     secrets: inherit
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: release
