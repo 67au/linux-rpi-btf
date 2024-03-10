@@ -38,7 +38,7 @@ jobs:
           rm -r workdir.tar.gz.*
           tar -xzf workdir.tar.gz
       - uses: uraimo/run-on-arch-action@v2.7.1
-        name: Prepare only
+        name: Prepare Release
         id: prepare
         with:
           arch: aarch64
