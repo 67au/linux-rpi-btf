@@ -73,6 +73,7 @@ jobs:
         if: inputs.workflow == ''
         with:
           workflow: release.yml
+          workflow_conclusion: in_progress
           name: linux-rpi-btf-${{ needs.prepare.outputs.ver }}
           path: 'repo'
       - name: Release
