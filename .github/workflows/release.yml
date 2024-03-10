@@ -18,7 +18,7 @@ jobs:
     name: setup
     runs-on: ubuntu-latest
     outputs:
-      workflow: ${{ steps.setup.outputs.workflow}}
+      workflow: ${{ steps.setup.outputs.workflow }}
       
     steps:
       - name: set workflow
