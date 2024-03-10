@@ -17,7 +17,7 @@ jobs:
 
   makepkg:
     name: Makepkg
-    needs: build
+    needs: makepkg
     uses: ./.github/workflows/makepkg.yml
     with:
       ver: ${{ needs.prepare.outputs.ver }}
