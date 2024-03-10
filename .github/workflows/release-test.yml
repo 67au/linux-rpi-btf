@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
+        with:
+          workflow: ${{ inputs.workflow }}
+          workflow_conclusion: in_progress
+          name: linux-rpi-btf-${{ inputs.ver }}
+          path: '.'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: release.yml
+          name: linux-rpi-btf-${{ inputs.ver }}
+          path: '.'
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            aarch64/linux-rpi-btf-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
+            aarch64/linux-rpi-btf-headers-${{ needs.prepare.outputs.ver }}-aarch64.pkg.tar.zst
