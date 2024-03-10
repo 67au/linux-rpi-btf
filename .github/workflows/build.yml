@@ -37,7 +37,9 @@ jobs:
             aarch64-linux-gnu-binutils \
             aarch64-linux-gnu-glibc \
             aarch64-linux-gnu-gcc \
-            ccache
+            ccache \
+            rsync \
+            pahole python bc kmod inetutils
       - name: build
         run: |
           cd ./workdir/PKGBUILDs/core/linux-rpi
