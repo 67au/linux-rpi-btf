@@ -61,3 +61,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: release
+        run: |
+          echo ''
