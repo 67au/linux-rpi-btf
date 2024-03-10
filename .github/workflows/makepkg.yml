@@ -25,7 +25,7 @@ jobs:
       - name: download artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: build.yml
+          workflow_search: true
           name: build-${{ inputs.ver }}
           path: '.' 
       - name: extract artifact
