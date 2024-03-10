@@ -108,8 +108,8 @@ jobs:
             rm scripts/mod/*.o
             rm scripts/modpost
             make olddefconfig -B
-            make scripts
-            make scripts/mod
+            make scripts -j4
+            make scripts/mod -j4
             
             cd /workdir/PKGBUILDs/core/linux-rpi
             makepkg -s --noconfirm --nodeps --sign -R
