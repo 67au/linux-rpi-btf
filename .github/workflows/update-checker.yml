@@ -43,5 +43,7 @@ jobs:
     name: Trigger build
     if: needs.check-update.outputs.output != 'true'
     uses: ./.github/workflows/release.yml
+    with:
+      workflow: update-checker.yml
     secrets: inherit
-  
+    
