@@ -106,7 +106,6 @@ jobs:
             rm scripts/asn1_compiler
             rm scripts/mod/mk_elfconfig
             rm scripts/mod/*.o
-            rm scripts/modpost
             make olddefconfig -B
             make scripts -j4
             make scripts/mod -j4
