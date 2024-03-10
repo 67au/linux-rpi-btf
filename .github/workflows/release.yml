@@ -67,7 +67,8 @@ jobs:
             cd /workdir/PKGBUILDs/core/linux-rpi
             sudo rm -rf pkg
             cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
-            make olddefconfig -B
+            make scripts clean
+            make scripts
             cd /workdir/PKGBUILDs/core/linux-rpi
             makepkg -s --noconfirm --nodeps --sign -R
             mkdir -p /workdir/repo/aarch64
