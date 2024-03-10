@@ -27,7 +27,7 @@ jobs:
         id: setup
         shell: bash
         run: |
-          if [ "${{ inputs.wolkflow }}" == '' ];
+          if [ "${{ inputs.workflow }}" == '' ];
           then
             echo "workflow=release.yml" >> "$GITHUB_OUTPUT"
           else
