@@ -3,6 +3,10 @@ name: Update Checker
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   check-update:
     runs-on: ubuntu-latest
