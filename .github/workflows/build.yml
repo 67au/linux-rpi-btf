@@ -13,6 +13,10 @@ on:
         description: "package ver"
         required: true
         type: string
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
 
 jobs:
   cross_build:
@@ -23,8 +27,16 @@ jobs:
     steps:
       - name: download artifact
         uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow != ''
         with:
-          workflow_search: true
+          workflow: ${{ inputs.workflow }}
+          name: prepare-${{ inputs.ver }}
+          path: '.'
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        if: inputs.workflow == ''
+        with:
+          workflow: prepare.yml
           name: prepare-${{ inputs.ver }}
           path: '.'
       - name: extruct workdir
