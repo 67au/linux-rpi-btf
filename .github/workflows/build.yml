@@ -95,13 +95,9 @@ jobs:
       - name: Setup Output
         run: |
           cd $GITHUB_WORKSPACE
-          tar -czf workdir.tar.gz ./workdir/PKGBUILDs/core/linux-rpi | split -b 1G -d - workdir.tar.gz.
-          rm workdir.tar.gz
-          mkdir output
-          mv workdir.tar.gz.* output
-          ls output
+          tar -czf - ./workdir/PKGBUILDs/core/linux-rpi | split -b 1G -d - workdir.tar.gz.
       - name: Upload Repo
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ inputs.ver }}
-          path: './output/*'
+          path: './workdir.tar.gz.*'
