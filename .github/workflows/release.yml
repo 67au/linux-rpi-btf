@@ -3,12 +3,35 @@ name: Release
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      workflow:
+        description: "set workflow to download artifact"
+        required: false
+        type: string
 
 permissions:
   contents: read
   packages: write
   
 jobs:
+  setup:
+    name: setup
+    runs-on: ubuntu-latest
+    outputs:
+      workflow: ${{ steps.setup.outputs.workflow}}
+      
+    steps:
+      - name: set workflow
+        id: setup
+        shell: bash
+        run: |
+          if [ "${{ inputs.wolkflow }}" == '' ];
+          then
+            echo "workflow=release.yml" >> "$GITHUB_OUTPUT"
+          else
+            echo "workflow=${{ inputs.wolkflow }}" >> "$GITHUB_OUTPUT"
+          fi
+
   prepare:
     name: Prepare
     uses: ./.github/workflows/prepare.yml
@@ -16,22 +39,25 @@ jobs:
 
   build:
     name: Build
-    needs: prepare
+    needs: [setup, prepare]
     uses: ./.github/workflows/build.yml
     with:
       ver: ${{ needs.prepare.outputs.ver }}
+      workflow: ${{ needs.setup.outputs.workflow }}
     secrets: inherit
 
   makepkg:
     name: Makepkg
-    needs: [prepare, build]
+    needs: [setup, prepare, build]
     uses: ./.github/workflows/makepkg.yml
     with:
       ver: ${{ needs.prepare.outputs.ver }}
+      workflow: ${{ needs.setup.outputs.workflow }}
     secrets: inherit
 
   release:
     name: release
+    needs: [setup, prepare, build, makepkg]
     runs-on: ubuntu-latest
     steps:
       - name: release
