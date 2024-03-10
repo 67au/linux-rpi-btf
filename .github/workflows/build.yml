@@ -24,7 +24,7 @@ jobs:
       - name: download artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: prepare.yml
+          workflow_search: true
           name: prepare-${{ inputs.ver }}
           path: '.'
       - name: extruct workdir
