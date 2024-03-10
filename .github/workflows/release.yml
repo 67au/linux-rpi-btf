@@ -1,0 +1,86 @@
+name: Prepare linux source
+
+on:
+  workflow_dispatch:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      ver:
+        description: "package ver"
+        required: true
+        type: string
+
+jobs:
+  alarm_release:
+    runs-on: ubuntu-latest
+    name: Prepare linux source
+    outputs:
+      ver: ${{ steps.set_output.outputs.ver }}
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: download artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: build.yml
+          name: build-${{ inputs.ver }}
+          path: '.' 
+      - uses: uraimo/run-on-arch-action@v2.7.1
+        name: Prepare only
+        id: prepare
+        with:
+          arch: aarch64
+          distro: archarm_latest
+          githubToken: ${{ secrets.GH_PAT }}
+          dockerRunArgs: |
+            --volume "${PWD}/workdir:/workdir" --user alarm
+          shell: /bin/bash
+          install: |
+            sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
+            pacman -Syu --noconfirm --noprogressbar --needed base gawk perl
+            rm -rf /etc/pacman.d/gnupg
+            pacman-key --init
+            pacman-key --populate archlinuxarm
+            pacman-key --lsign-key "builder@archlinuxarm.org"
+            pacman -S --noconfirm --noprogressbar --needed base-devel python pahole ccache distcc bc kmod inetutils
+            useradd -m alarm
+            sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j5"/' /etc/makepkg.conf
+            sed -i 's/#PACKAGER="John Doe <john@doe.com>"/PACKAGER="${{ secrets.PACKAGER }}"/' /etc/makepkg.conf
+            sed -i 's/#GPGKEY=""/GPGKEY="${{ secrets.GPGKEY }}"/' /etc/makepkg.conf
+            sed -i "s/PKGEXT='.pkg.tar.xz'/PKGEXT='.pkg.tar.zst'/" /etc/makepkg.conf
+            sed -i "s/BUILDENV=(!distcc color !ccache check !sign)/BUILDENV=(!distcc color ccache check sign)/" /etc/makepkg.conf
+            # sed -i 's/#DISTCC_HOSTS=""/DISTCC_HOSTS="localhost\/5:3632"/' /etc/makepkg.conf
+            echo "alarm ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+          run: |
+            sudo chown alarm:alarm -R /workdir
+            echo -n "${{ secrets.GPG_SIGNING_KEY }}" | gpg --import
+            sudo pacman-key --recv-keys ${{ secrets.GPGKEY }}
+            sudo pacman-key --finger ${{ secrets.GPGKEY }}
+            sudo pacman-key --lsign-key ${{ secrets.GPGKEY }}
+            cd /workdir/PKGBUILDs/core/linux-rpi
+            sudo rm -rf pkg
+            cd "`find src -maxdepth 1 -name 'linux-*' -type d`"
+            make olddefconfig -B
+            cd /workdir/PKGBUILDs/core/linux-rpi
+            makepkg -s --noconfirm --nodeps --sign -R
+            mkdir -p /workdir/repo/aarch64
+            cp ./*.pkg.tar.zst /workdir/repo/aarch64
+            cd /workdir/repo/aarch64
+            repo-add --verify --sign fqegg.db.tar.gz *.pkg.tar.zst
+      - name: set output
+        id: set_output
+        run: |
+          sudo chown runner:docker -R ./workdir
+          mv ./workdir/repo ./repo
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'linux-rpi-btf'
+          path: './repo'
