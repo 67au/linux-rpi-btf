@@ -12,6 +12,7 @@ jobs:
   prepare:
     name: Prepare
     uses: ./.github/workflows/prepare.yml
+    secrets: inherit
 
   build:
     name: Build
@@ -19,6 +20,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       ver: ${{ needs.prepare.outputs.ver }}
+    secrets: inherit
 
   makepkg:
     name: Makepkg
@@ -26,3 +28,4 @@ jobs:
     uses: ./.github/workflows/makepkg.yml
     with:
       ver: ${{ needs.prepare.outputs.ver }}
+    secrets: inherit
