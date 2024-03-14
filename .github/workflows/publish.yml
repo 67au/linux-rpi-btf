@@ -47,6 +47,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: aarch64
+          append_body: false
+          generate_release_notes: false
           name: ${{ inputs.ver }}
           files: |
             repo/aarch64/*.pkg.tar.zst*
