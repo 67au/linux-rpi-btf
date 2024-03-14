@@ -31,7 +31,7 @@ jobs:
         if: inputs.workflow != ''
         with:
           workflow: ${{ inputs.workflow }}
-          workflow_conclusion: in_progress
+          run_id: ${{ github.run_id }}
           name: build-${{ inputs.ver }}
           path: '.'
       - name: download artifact

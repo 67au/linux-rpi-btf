@@ -31,7 +31,7 @@ jobs:
           then
             echo "workflow=release.yml" >> "$GITHUB_OUTPUT"
           else
-            echo "workflow=${{ inputs.wolkflow }}" >> "$GITHUB_OUTPUT"
+            echo "workflow=${{ inputs.workflow }}" >> "$GITHUB_OUTPUT"
           fi
 
   prepare:

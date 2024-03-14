@@ -33,7 +33,7 @@ jobs:
         if: inputs.workflow != ''
         with:
           workflow: ${{ inputs.workflow }}
-          workflow_conclusion: in_progress
+          run_id: ${{ github.run_id }}
           name: linux-rpi-btf-${{ inputs.ver }}
           path: 'repo'
       - name: download artifact
